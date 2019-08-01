@@ -12,12 +12,15 @@ const Header = ({name}) => (
   <h1>{name}</h1>
 )
 
-const Content = ({parts}) => (
-  <>
-  {parts.map(parts => <p>{parts.name} {parts.exercises}</p>)}
-  <p>total of {parts[0].exercises+parts[1].exercises+parts[2].exercises+parts[3].exercises} exercises</p>
-  </>
-)
+const Content = ({parts}) => {
+  const total = parts.reduce((sum, value) => sum + value.exercises, 0)
+  return (
+    <>
+    {parts.map(parts => <p key={parts.id}>{parts.name} {parts.exercises}</p>)}
+    <p><strong>Total of {total} exercises</strong></p>
+    </>
+  )
+}
 
 const App = () => {
   const course = {
