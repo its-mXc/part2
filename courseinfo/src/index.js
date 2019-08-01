@@ -4,7 +4,7 @@ import ReactDOM from 'react-dom'
 const Course = ({course}) => (
   <>
   <Header name={course.name} />
-  <Content part={course.parts} />
+  <Content parts={course.parts} />
   </>
 )
 
@@ -12,20 +12,12 @@ const Header = ({name}) => (
   <h1>{name}</h1>
 )
 
-const Content = ({part}) => (
+const Content = ({parts}) => (
   <>
-  <Part display={part[0]} />
-  <Part display={part[1]} />
-  <Part display={part[2]} />
-  <Part display={part[3]} />
-  <p>total of {part[0].exercises+part[1].exercises+part[2].exercises+part[3].exercises} exercises</p>
+  {parts.map(parts => <p>{parts.name} {parts.exercises}</p>)}
+  <p>total of {parts[0].exercises+parts[1].exercises+parts[2].exercises+parts[3].exercises} exercises</p>
   </>
 )
-
-const Part = ({display}) => (
-  <p>{display.name} {display.exercises}</p>
-)
-
 
 const App = () => {
   const course = {
