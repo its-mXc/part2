@@ -1,28 +1,8 @@
 import React, { useState } from 'react'
+import Persons from './components/Persons'
+import PersonForm from './components/PersonForm'
+import Filter from './components/Filter'
 
-const Filter = ({filter,handleFilter}) => (
-  <div>filter shown with <input value={filter} onChange={handleFilter} /></div>
-)
-
-const PersonForm = ({addPerson,newName,handlePerson,newNo,handleNumber}) => (
-  <form onSubmit={addPerson}>
-    <div>
-      name: <input value={newName} onChange={handlePerson} />
-    </div>
-    <div>
-      number: <input value={newNo} onChange={handleNumber}/>
-    </div>
-    <div>
-      <button type="submit">add</button>
-    </div>
-  </form>
-)
-
-const Persons = ({show}) => (
-  <div>
-  {show}
-  </div>
-)
 const App = () => {
   const [ persons, setPersons] = useState([
     { name: 'Arto Hellas', number: '040-123456' },
