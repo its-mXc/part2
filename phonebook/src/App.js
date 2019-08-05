@@ -1,28 +1,42 @@
 import React, {useState,useEffect} from 'react'
 import phonebookService from './services/Note.js'
 
-import Persons from './components/Persons'
-import PersonForm from './components/PersonForm'
-import Filter from './components/Filter'
+
+const Person = ({person,toggleDelete}) => (
+  <>
+    <p>{person.name} {person.number} <button onClick={toggleDelete}>
+                                        Delete
+                                      </button>
+    </p>
+  </>
+)
 
 const App = () => {
   const [ persons, setPersons] = useState([])
   const [ newName, setNewName ] = useState('')
   const [newNo,setNewNo] = useState('')
   const [filter,setFilter] = useState('')
+  const [showAll,setShowAll] = useState(true)
 
+  const toggleDeleteOf = id => {
+    phonebookService
+      .deletion(id)
+        .then(afterDeletion => {
+          setPersons(persons.filter(p => p.id !== id))
+        })
+  }
 
   useEffect(() => {
-    phonebookService
-      .getAll()
-        .then(response=>{
-          setPersons(response.data)
+   phonebookService
+     .getAll()
+       .then(initialPersons => {
+          setPersons(initialPersons)
       })
-  },[])
+    }, [])
 
 
   const addPerson = (event) => {
-    const isDuplicate = persons.find(person => person.name === newName)
+    const isDuplicate = persons.find(person => person.number === newNo && person.name === newName)
     if (typeof isDuplicate === "undefined"){
       event.preventDefault()
       const personObject = {
@@ -31,8 +45,8 @@ const App = () => {
       }
       phonebookService
         .create(personObject)
-          .then(response => {
-            setPersons(persons.concat(response.data))
+          .then(newPerson => {
+            setPersons(persons.concat(newPerson))
             setNewName('')
             setNewNo('')
           })
@@ -42,7 +56,7 @@ const App = () => {
     }
   }
 
-  const handlePerson =(event) => {
+  const handleName =(event) => {
     setNewName(event.target.value)
   }
 
@@ -52,37 +66,34 @@ const App = () => {
 
   const handleFilter = (event) => {
     setFilter(event.target.value)
+    setShowAll(false)
   }
+  const filtered = showAll ? persons : persons.filter(p => p.name.toLowerCase().indexOf(filter.toLowerCase()) !== -1);
 
-  const filterBook = persons.filter(person => person.name === filter)
+  const rows = () => (
+    filtered.map(p =>
+                  <Person
+                  key={p.id}
+                  person={p}
+                  toggleDelete={() => toggleDeleteOf(p.id)}
+                  />
+  )
+)
 
-  const show = () => {
-    if (filter === '') {
-      return (
-        persons.map(person => <p key={person.name}>{person.name} {person.number}</p>)
-      )
-    }
-    else {
-      return (
-        filterBook.map(person => <p key={person.name}>{person.name} {person.number}</p>)
-      )
-    }
-  }
+
 
   return (
     <div>
-      <h2>Phonebook</h2>
-      <Filter filter={filter} handleFilter={handleFilter}/>
-      <h2>add a new</h2>
-      <PersonForm
-        addPerson={addPerson}
-        newName={newName}
-        handlePerson={handlePerson}
-        newNo={newNo}
-        handleNumber={handleNumber}
-      />
+      <h1>Phonebook</h1>
+      <p>Filter shown with <input value={filter} onChange={handleFilter} /></p>
+      <h2>Add a person</h2>
+      <form onSubmit={addPerson}>
+        <p>name:<input value={newName} onChange={handleName} /></p>
+        <p>number:<input value={newNo} onChange={handleNumber}/></p>
+        <p><button type="submit">add</button></p>
+      </form>
       <h2>Numbers</h2>
-      <Persons show={show()}/>
+      {rows()}
     </div>
   )
 }
