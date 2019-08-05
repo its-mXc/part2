@@ -1,4 +1,5 @@
 import React, {useState,useEffect} from 'react'
+import './index.css'
 import phonebookService from './services/Note.js'
 
 
@@ -11,20 +12,53 @@ const Person = ({person,toggleDelete}) => (
   </>
 )
 
+const Notification = ({ message }) => {
+  if (message === null) {
+    return null
+  }
+
+  return (
+    <div className="notification">
+      <center>{message}</center>
+    </div>
+  )
+}
+
+const Error = ({ errormessage }) => {
+  if (errormessage === null) {
+    return null
+  }
+
+  return (
+    <div className="error">
+      <center>{errormessage}</center>
+    </div>
+  )
+}
+
 const App = () => {
   const [ persons, setPersons] = useState([])
   const [ newName, setNewName ] = useState('')
   const [newNo,setNewNo] = useState('')
   const [filter,setFilter] = useState('')
   const [showAll,setShowAll] = useState(true)
+  const [message,setMessage] = useState(null)
+  const [errormessage,setErrorMessage] = useState(null)
+
 
   const toggleDeleteOf = id => {
-    if (window.confirm(`Delete Number`)) {
+    const toBeDeleted = persons.find(p => p.id === id)
+    if (window.confirm(`Delete Number ${toBeDeleted.name}`)) {
     phonebookService
       .deletion(id)
         .then(afterDeletion => {
           setPersons(persons.filter(p => p.id !== id))
+          setMessage(`${toBeDeleted.name} Deleted`)
+          setTimeout(() => {
+            setMessage(null)
+          },5000)
         })
+
     }
   }
 
@@ -49,6 +83,13 @@ const App = () => {
               .then(returnedPerson => {
                 setPersons(persons.map(person => person.id !== id ? person : returnedPerson))
               })
+              .catch(error => {
+                setErrorMessage(`${isDuplicate.name} is already removed from System`)
+                setTimeout(() => {
+                  setErrorMessage(null)
+                },5000)
+                setPersons(persons.map((person => person.id !==id)))
+              })
         }
       }
       else {
@@ -63,6 +104,10 @@ const App = () => {
               setNewName('')
               setNewNo('')
         })
+        setMessage(`${newName} added`)
+        setTimeout(() => {
+          setMessage(null)
+        },5000)
       }
     }
 
@@ -95,6 +140,8 @@ const App = () => {
   return (
     <div>
       <h1>Phonebook</h1>
+      <Notification message={message} />
+      <Error errormessage={errormessage} />
       <p>Filter shown with <input value={filter} onChange={handleFilter} /></p>
       <h2>Add a person</h2>
       <form onSubmit={addPerson}>
