@@ -19,11 +19,13 @@ const App = () => {
   const [showAll,setShowAll] = useState(true)
 
   const toggleDeleteOf = id => {
+    if (window.confirm(`Delete Number`)) {
     phonebookService
       .deletion(id)
         .then(afterDeletion => {
           setPersons(persons.filter(p => p.id !== id))
         })
+    }
   }
 
   useEffect(() => {
@@ -35,26 +37,34 @@ const App = () => {
     }, [])
 
 
-  const addPerson = (event) => {
-    const isDuplicate = persons.find(person => person.number === newNo && person.name === newName)
-    if (typeof isDuplicate === "undefined"){
+    const addPerson = (event) => {
       event.preventDefault()
-      const personObject = {
-        name: newName,
-        number: newNo
+      const isDuplicate = persons.find(person => person.name.toLowerCase() === newName.toLowerCase())
+      if (typeof isDuplicate !== 'undefined'){
+        if(window.confirm(`Number already in list,Update ${isDuplicate.name}?`)) {
+          const id = isDuplicate.id
+          const changedPerson = { ...isDuplicate, number: newNo }
+          phonebookService
+            .update(id, changedPerson)
+              .then(returnedPerson => {
+                setPersons(persons.map(person => person.id !== id ? person : returnedPerson))
+              })
+        }
       }
-      phonebookService
-        .create(personObject)
-          .then(newPerson => {
-            setPersons(persons.concat(newPerson))
-            setNewName('')
-            setNewNo('')
-          })
+      else {
+        const personObject = {
+          name: newName,
+          number: newNo
+        }
+        phonebookService
+          .create(personObject)
+            .then(newPerson => {
+              setPersons(persons.concat(newPerson))
+              setNewName('')
+              setNewNo('')
+        })
+      }
     }
-    else {
-     window.alert(`${newName} is already added to phonebook`)
-    }
-  }
 
   const handleName =(event) => {
     setNewName(event.target.value)
